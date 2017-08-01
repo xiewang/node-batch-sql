@@ -21,5 +21,13 @@
   "bugs": {
     "url": "https://github.com/xiewang/node-batch-sql/issues"
   },
-  "homepage": "https://github.com/xiewang/node-batch-sql"
+  "homepage": "https://github.com/xiewang/node-batch-sql",
+  "dependencies": {
+    "bluebird": "^3.5.0",
+    "lodash": "^4.17.4",
+    "log4js": "^2.3.2",
+    "mysql": "^2.14.0",
+    "request": "^2.81.0",
+    "request-promise": "^4.2.1"
+  }
 }
