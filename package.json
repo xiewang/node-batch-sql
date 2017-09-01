@@ -1,33 +1,33 @@
 {
   "name": "node-batch-sql",
-  "version": "1.0.0",
-  "description": "node batch sql operation",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "version": "0.1.0",
+  "devDependencies": {
+    "react-scripts": "0.8.4",
+    "redux-devtools": "^3.3.2",
+    "redux-logger": "^2.7.4"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/xiewang/node-batch-sql.git"
-  },
-  "keywords": [
-    "node",
-    "batch",
-    "mysql",
-    "sql"
-  ],
-  "author": "xiewang",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/xiewang/node-batch-sql/issues"
-  },
-  "homepage": "https://github.com/xiewang/node-batch-sql",
   "dependencies": {
     "bluebird": "^3.5.0",
+    "body-parser": "^1.17.2",
+    "express": "^4.15.4",
+    "framework7": "^1.5.2",
     "lodash": "^4.17.4",
-    "log4js": "^2.3.2",
-    "mysql": "^2.14.0",
-    "request": "^2.81.0",
+    "log4js": "^2.3.3",
+    "mysql": "^2.14.1",
+    "node-schedule": "^1.2.4",
+    "react": "^15.4.1",
+    "react-dom": "^15.4.1",
+    "react-redux": "^5.0.2",
+    "react-router": "^3.0.2",
+    "redux": "^3.6.0",
+    "redux-thunk": "^2.2.0",
     "request-promise": "^4.2.1"
-  }
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  },
+  "proxy": "http://127.0.0.1:3001"
 }
