@@ -33,11 +33,12 @@ class App extends Component {
         fetch('/add', options).then((response) => {
             if (response.status === 200) {
                 success = true;
+                const json = response.json();
+                return json;
             } else {
                 success = false;
+                return {};
             }
-            const json = response.json();
-            return json;
         }).then((responseData) => {
             if (success) {
                 the.setState({showTip: true});

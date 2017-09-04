@@ -5,7 +5,6 @@ var Promise = require('bluebird');
 var rp = require('request-promise');
 var log4js = require('log4js');
 var config = require('../constants.js');
-
 log4js.configure({
     appenders: {
         out: {type: 'stdout'},
@@ -17,16 +16,17 @@ log4js.configure({
 });
 var logger = log4js.getLogger();
 logger.level = 'debug';
-var host = 'http://bandaowang.shop:81';
-var connection = mysql.createConnection({
-    host: config.host,
-    user: config.user,
-    password: config.password,
-    database: config.database
-});
-
 
 module.exports = function (req, response) {
+
+    var host = 'http://996shop.com';
+    var connection = mysql.createConnection({
+        host: config.host,
+        user: config.user,
+        password: config.password,
+        database: config.database,
+        insecureAuth: true
+    });
     var text = req.body.code;
     var apiLink = 'http://e22a.com/h.qZuQv7';
     var options = {
