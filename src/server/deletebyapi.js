@@ -4,6 +4,8 @@ var Promise = require('bluebird');
 var rp = require('request-promise');
 var log4js = require('log4js');
 var config = require('../constants.js');
+var taobaoapi = require('./taobaoAPI.js');
+console.log(taobaoapi(''))
 log4js.configure({
     appenders: {
         out: { type: 'stdout' },
