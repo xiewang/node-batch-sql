@@ -4,24 +4,24 @@ var Promise = require('bluebird');
 var rp = require('request-promise');
 var log4js = require('log4js');
 var config = require('../constants.js');
-var taobaoapi = require('./taobaoAPI.js');
-console.log(taobaoapi(''))
+var ApiClient = require('./taobaosdk/index.js').ApiClient;
+
 log4js.configure({
     appenders: {
-        out: { type: 'stdout' },
-        app: { type: 'file', filename: 'application.log' }
+        out: {type: 'stdout'},
+        app: {type: 'file', filename: 'application.log'}
     },
     categories: {
-        default: { appenders: [ 'out', 'app' ], level: 'debug' }
+        default: {appenders: ['out', 'app'], level: 'debug'}
     }
 });
 var logger = log4js.getLogger();
 logger.level = 'debug';
 
 var connection = '';
-//start();
+start();
 
-function start(){
+function start() {
     connection = mysql.createConnection({
         host: config.host,
         user: config.user,
@@ -30,15 +30,15 @@ function start(){
         insecureAuth: true
     });
     // connection.connect();
-    connection.connect(function(err) {              // The server is either down
-        if(err) {                                     // or restarting (takes a while sometimes).
+    connection.connect(function (err) {              // The server is either down
+        if (err) {                                     // or restarting (takes a while sometimes).
             console.log('error when connecting to db:', err);
             setTimeout(start, 2000); // We introduce a delay before attempting to reconnect,
         }                                     // to avoid a hot loop, and to allow our node script to
     });                                     // process asynchronous requests in the meantime.
-    connection.on('error', function(err) {
+    connection.on('error', function (err) {
         console.log('db error', err);
-        if(err.code === 'PROTOCOL_CONNECTION_LOST') { // Connection to the MySQL server is usually
+        if (err.code === 'PROTOCOL_CONNECTION_LOST') { // Connection to the MySQL server is usually
             start();                         // lost due to either server restart, or a
         } else {                                      // connnection idle timeout (the wait_timeout
             throw err;                                  // server variable configures this)
@@ -57,7 +57,7 @@ function start(){
         "AND t1.post_type = 'post' " +
         "AND t2.name='auto' " +
         "AND t5.meta_key='hao_ljgm' ";
-        //"AND t5.meta_key='hao_ljgm' limit 10 ";
+    //"AND t5.meta_key='hao_ljgm' limit 100 ";
     connection.query(sql, function (error, results, fields) {
         if (error) {
             logger.error(error);
@@ -99,89 +99,104 @@ function deleteData(results) {
 
     var cates = {};
     _.each(results, function (v, k) {
-        var del = function (v,k) {
+        var del = function (v, k) {
             var couponLink = v['meta_value'];
             var temp = couponLink.split('?');
             temp = couponLink.replace(temp[0] + '?', '');
-            temp = temp.replace('&pid=mm_14661123_33544947_119412095&af=1', '');
-            var apiLink = 'https://uland.taobao.com/cp/coupon?' + temp;
-
-            var ip = '1.'+Math.floor((k/256/256)%256)+'.'+Math.floor((k/256)%256)+'.'+k%256;
-            var options = {
-                uri: apiLink,
-                timeout: 1000,
-                headers: {
-                    'User-Agent': 'ie_user_agent'+k,
-                    'X-Forwarded-For': ip,
-                    'Cache-Control': 'no-cache'
+            var params = temp.split('&');
+            var me = '';
+            _.each(params, function (v, k) {
+                var vv = v.split('=');
+                if (vv[0] == 'e') {
+                    me = vv[1];
                 }
-            };
-            rp(options)
-                .then(function (res) {
-                    res = JSON.parse(res);
-                    if (!res.result.amount) {
-                        connection.query(del_post + v['id'], function (error, results, fields) {
-                            if (error) {
-                                logger.error(error);
-                            }
-                            logger.info(k+'deleted post ' +v['id']+':' + results.affectedRows + ' rows');
-                        });
-                        connection.query(del_meta + v['id'], function (error, results, fields) {
-                            if (error) {
-                                logger.error(error);
-                            }
-                            logger.info(k+'deleted meta ' +v['id']+':'+ results.affectedRows + ' rows');
-                        });
+            });
+            var client = new ApiClient({
+                'appkey': '24545248',
+                'appsecret': '9e69eb2ab9fa086d31ddf043493a6a49',
+                'REST_URL': 'http://gw.api.taobao.com/router/rest'
+            });
 
-                        connection.query('SELECT * FROM wp_term_relationships WHERE object_id = ' + v['id'], function (error, results, fields) {
-                            if (error) {
-                                logger.error(error);
-                            }
-                            logger.info('The wp_term_relationships is: ', results);
-                            if (results.length !== 0) {
-                                _.each(results, function (v, k) {
-                                    cates[v['term_taxonomy_id']] = cates[v['term_taxonomy_id']]?++cates[v['term_taxonomy_id']]:1;
-
-                                });
-                            }
-                        });
-
-                        connection.query(del_term_relationships + v['id'], function (error, results, fields) {
-                            if (error) {
-                                logger.error(error);
-                            }
-                            logger.info(k+'deleted del_term_relationships' + results.affectedRows + ' rows');
-                        });
+            var sqldelete = function(){
+                connection.query(del_post + v['id'], function (error, results, fields) {
+                    if (error) {
+                        logger.error(error);
                     }
-                    //console.log(res);
-                    if(k === results.length-1){
-
-                    }
-                })
-                .catch(function (err) {
-                    logger.error(err);
+                    logger.info(k + 'deleted post ' + v['id'] + ':' + results.affectedRows + ' rows');
                 });
+                connection.query(del_meta + v['id'], function (error, results, fields) {
+                    if (error) {
+                        logger.error(error);
+                    }
+                    logger.info(k + 'deleted meta ' + v['id'] + ':' + results.affectedRows + ' rows');
+                });
+
+                connection.query('SELECT * FROM wp_term_relationships WHERE object_id = ' + v['id'], function (error, results, fields) {
+                    if (error) {
+                        logger.error(error);
+                    }
+                    logger.info('The wp_term_relationships is: ', results);
+                    if (results.length !== 0) {
+                        _.each(results, function (v, k) {
+                            cates[v['term_taxonomy_id']] = cates[v['term_taxonomy_id']] ? ++cates[v['term_taxonomy_id']] : 1;
+
+                        });
+                    }
+                });
+
+                connection.query(del_term_relationships + v['id'], function (error, results, fields) {
+                    if (error) {
+                        logger.error(error);
+                    }
+                    logger.info(k + 'deleted del_term_relationships' + results.affectedRows + ' rows');
+                });
+            }
+            client.execute('taobao.tbk.coupon.get', {
+                'me': me
+            }, function (error, response) {
+                try{
+                    if (!error) {
+                        if (!(response.data.coupon_total_count && response.data.coupon_total_count > 0)) {
+
+                            sqldelete();
+                        }else {
+                            console.log('a'+JSON.stringify(response))
+                        }
+                    } else {
+                        sqldelete();
+                        logger.error('error'+JSON.stringify(error));
+                    }
+                }catch(e){
+                    sqldeleteRelated();
+                }
+
+            });
+
         };
         setTimeout(function () {
-            del(v,k);
-        }, k * 1000);
+            del(v, k);
+        }, k * 100);
 
 
     });
-    setTimeout(function () {
-        logger.info('cates: '+JSON.stringify(cates));
+
+    var sqldeleteRelated = function(){
+        logger.info('cates: ' + JSON.stringify(cates));
         _.each(cates, function (v, k) {
             var term_taxonomy_id = k;
-            connection.query('UPDATE wp_term_taxonomy SET count=count-'+v+' where term_taxonomy_id = ' + term_taxonomy_id, function (error, results, fields) {
+            connection.query('UPDATE wp_term_taxonomy SET count=count-' + v + ' where term_taxonomy_id = ' + term_taxonomy_id, function (error, results, fields) {
                 if (error) {
                     logger.error(error);
                 }
-                logger.info('term_taxonomy_id '+term_taxonomy_id+': update wp_term_taxonomy' + results.affectedRows + ' rows');
+                logger.info('term_taxonomy_id ' + term_taxonomy_id + ': update wp_term_taxonomy' + results.affectedRows + ' rows');
             });
         });
 
         connection.end();
-    }, results.length * 1000);
+    };
+    setTimeout(function () {
+        sqldeleteRelated();
+    }, results.length * 100);
 }
 
 
