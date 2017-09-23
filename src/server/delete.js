@@ -18,13 +18,13 @@ var logger = log4js.getLogger();
 logger.level = 'debug';
 
 var connection = '';
-
+//start();
 function start(){
     connection = mysql.createConnection({
         host: config.host,
         user: config.user,
         password: config.password,
-        database: config.database
+        database: config.database,
         insecureAuth: true
     });
     // connection.connect();
@@ -42,7 +42,7 @@ function start(){
             throw err;                                  // server variable configures this)
         }
     });
-    
+
     //var sql = "SELECT wp.id,pm.meta_value FROM wp_postmeta pm LEFT JOIN wp_posts wp ON wp.ID = pm.post_id WHERE post_title = '夏季韩版长袖防晒衣女开衫中长款大码宽松沙滩雪纺披肩超薄款外套' and meta_key = 'hao_ljgm'";
     var sql = "SELECT t1.id,t5.meta_value " +
         "FROM wp_posts t1, wp_terms t2, wp_term_relationships t3,wp_term_taxonomy t4, wp_postmeta t5 " +
@@ -103,9 +103,16 @@ function deleteData(results) {
             temp = couponLink.replace(temp[0] + '?', '');
             temp = temp.replace('&pid=mm_14661123_33544947_119412095&af=1', '');
             var apiLink = 'https://uland.taobao.com/cp/coupon?' + temp;
+
+            var ip = '1.'+Math.floor((k/256/256)%256)+'.'+Math.floor((k/256)%256)+'.'+k%256;
             var options = {
                 uri: apiLink,
-                timeout: 1000
+                timeout: 1000,
+                headers: {
+                    'User-Agent': 'ie_user_agent'+k,
+                    'X-Forwarded-For': ip,
+                    'Cache-Control': 'no-cache'
+                }
             };
             rp(options)
                 .then(function (res) {
