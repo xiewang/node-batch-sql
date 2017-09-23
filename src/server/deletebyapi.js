@@ -19,7 +19,7 @@ var logger = log4js.getLogger();
 logger.level = 'debug';
 
 var connection = '';
-start();
+//start();
 
 function start() {
     connection = mysql.createConnection({
@@ -117,7 +117,7 @@ function deleteData(results) {
                 'REST_URL': 'http://gw.api.taobao.com/router/rest'
             });
 
-            var sqldelete = function(){
+            var sqldelete = function () {
                 connection.query(del_post + v['id'], function (error, results, fields) {
                     if (error) {
                         logger.error(error);
@@ -154,19 +154,19 @@ function deleteData(results) {
             client.execute('taobao.tbk.coupon.get', {
                 'me': me
             }, function (error, response) {
-                try{
+                try {
                     if (!error) {
                         if (!(response.data.coupon_total_count && response.data.coupon_total_count > 0)) {
 
                             sqldelete();
-                        }else {
-                            console.log('a'+JSON.stringify(response))
+                        } else {
+                            console.log('a' + JSON.stringify(response))
                         }
                     } else {
                         sqldelete();
-                        logger.error('error'+JSON.stringify(error));
+                        logger.error('error' + JSON.stringify(error));
                     }
-                }catch(e){
+                } catch (e) {
                     sqldeleteRelated();
                 }
 
@@ -180,7 +180,7 @@ function deleteData(results) {
 
     });
 
-    var sqldeleteRelated = function(){
+    var sqldeleteRelated = function () {
         logger.info('cates: ' + JSON.stringify(cates));
         _.each(cates, function (v, k) {
             var term_taxonomy_id = k;
