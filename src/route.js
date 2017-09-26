@@ -6,12 +6,15 @@ import {
 } from 'react-router';
 
 import Home from './pages/home';
+import Home from './pages/upload';
 
 class DSJRouter extends Component {
     render() {
         return (
             <Router history={browserHistory}>
                 <Route path="/" component={Home}/>
+                <Route/>
+                <Route path="/u" component={Upload}/>
                 <Route/>
             </Router>
         );
