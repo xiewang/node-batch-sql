@@ -1,8 +1,10 @@
 var express = require('express')
 var app = express()
-var add = require('./src/server'
+var add = require('./src/server')
 var upload = require('./src/server/upload.js')
 var bodyParser = require('body-parser')
+var multer = require('multer');
+var path = multer({dest: __dirname + '/public'});
 
 app.use(function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
@@ -10,8 +12,9 @@ app.use(function (req, res, next) {
     next();
 });
 app.use(bodyParser.urlencoded({ extended: true }))
+app.use(express.static(__dirname + '/public'))
 app.post('/add', add);
-app.post('/upload', upload);
+app.post('/upload', path.single('avatar'), upload);
 
 app.listen(3001, function () {
     console.log('Mock Data Server on port %d', 3001)
