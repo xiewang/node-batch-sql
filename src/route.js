@@ -6,7 +6,7 @@ import {
 } from 'react-router';
 
 import Home from './pages/home';
-import Home from './pages/upload';
+import Upload from './pages/upload';
 
 class DSJRouter extends Component {
     render() {

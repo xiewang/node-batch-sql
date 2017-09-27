@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+var Upload = require('rc-upload');
 
 class App extends Component {
     constructor(props) {
@@ -71,7 +72,7 @@ class App extends Component {
                 </div>
                 <div className="section">
                     <label htmlFor="code"><span>csv:</span></label>
-                    <input type="file"/>
+                    <Upload />
                 </div>
 
                 <div className="section">
