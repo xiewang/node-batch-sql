@@ -315,7 +315,7 @@ module.exports = function () {
 
     });
 
-    var chunkMount = 4500;
+    var chunkMount = 10000;
     var chunks = _.chunk(res, chunkMount);
     _.each(chunks, function (v, k) {
         if (k != 0) {
@@ -324,6 +324,6 @@ module.exports = function () {
         csv.transform(chunks[k], function (data) {
             data.push(data);
             return data.join(',') + '\n';
-        }).pipe(fs.createWriteStream('result' + k + '.csv'), {encoding: 'utf8'});
+        }).pipe(fs.createWriteStream(__dirname + '/../../public/result' + k + '.csv'), {encoding: 'utf8'});
     });
-}
+};
