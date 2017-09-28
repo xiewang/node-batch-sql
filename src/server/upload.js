@@ -1,20 +1,22 @@
 "use strict";
 
 var fs = require("fs");
+var transform = require("./transformCSV.js");
 
 module.exports = function (req, res, next) {
-    var des_file = __dirname + "/../../public/" + req.file.originalname;
+    var des_file = __dirname + "/../../public/source." + req.file.originalname.split('.')[req.file.originalname.split('.').length - 1];
     var response = '';
 
-    fs.rename(req.file.path, des_file, function(err) {
+    fs.rename(req.file.path, des_file, function (err) {
         if (err) throw err;
-        fs.unlink(req.file.path, function() {
+        fs.unlink(req.file.path, function () {
             if (err) throw err;
+            transform();
             response = {
-                message:'File uploaded successfully',
-                filename:req.file.originalname
+                message: 'File uploaded successfully',
+                filename: req.file.originalname
             };
-            res.end( JSON.stringify( response ) );
+            res.end(JSON.stringify(response));
         });
     });
 };
