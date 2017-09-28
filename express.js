@@ -14,7 +14,7 @@ app.use(function (req, res, next) {
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(express.static(__dirname + '/public'))
 app.post('/add', add);
-app.post('/upload', path.single('avatar'), upload);
+app.post('/upload', path.single('file'), upload);
 
 app.listen(3001, function () {
     console.log('Mock Data Server on port %d', 3001)
