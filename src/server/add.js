@@ -1,3 +1,4 @@
+var comm = require('../utils/common');
 var mysql = require('mysql');
 var _ = require('lodash');
 var Promise = require('bluebird');
