@@ -24,20 +24,34 @@ var connection = '';
 //start();
 
 function start() {
-    fs.readFile(__dirname + '/../../public/result0.csv', function (err, data) {
-        if (err) {
-            console.log(err.stack);
-            return false;
-        }
-        try{
-            csv.parse(data, function(err, data){
-                console.log(data)
-            });
-        }catch(e){
-            return false;
-        }
+    return new Promise(function(resolve, reject){
+        fs.readFile(__dirname + '/../../public/csv/result0.csv', function (err, data) {
+            if (err) {
+                console.log(err.stack);
+                resolve(false);
+            }
+            try{
+                //return csv.parse(data, function(err, data){
+                //    console.log(data)
+                //    return true;
+                //});
+                resolve(ConvertToTable(data));
+            }catch(e){
+                resolve(false);
+            }
+        });
     });
-    return true;
+
+    function ConvertToTable(data) {
+        data = data.toString();
+        var table = new Array();
+        var rows = new Array();
+        rows = data.split("\r\n");
+        for (var i = 0; i < rows.length; i++) {
+            table.push(rows[i].split(","));
+        }
+        return table;
+    }
 
     connection = mysql.createConnection({
         host: config.host,

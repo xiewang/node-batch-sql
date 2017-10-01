@@ -6,7 +6,7 @@ var add = require("./add.js");
 
 
 module.exports = function (req, res, next) {
-    var des_file = __dirname + "/../../public/source." + req.file.originalname.split('.')[req.file.originalname.split('.').length - 1];
+    var des_file = __dirname + "/../../public/csv/source." + req.file.originalname.split('.')[req.file.originalname.split('.').length - 1];
     var response = '';
 
     fs.rename(req.file.path, des_file, function (err) {
@@ -14,12 +14,15 @@ module.exports = function (req, res, next) {
         fs.unlink(req.file.path, function () {
             if (err) throw err;
             //transform();
-            add();
-            response = {
-                message: 'File uploaded successfully',
-                filename: req.file.originalname
-            };
-            res.end(JSON.stringify(response));
+            add()
+                .then(function () {
+                    response = {
+                        message: 'File uploaded successfully',
+                        filename: req.file.originalname
+                    };
+                    res.end(JSON.stringify(response));
+                });
+
         });
     });
 };

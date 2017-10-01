@@ -4,7 +4,7 @@ var csv = require('csv');
 var _ = require('lodash');
 
 module.exports = function () {
-    var workSheetsFromBuffer = xlsx.parse(fs.readFileSync(`${__dirname}/../../public/source.xls`));
+    var workSheetsFromBuffer = xlsx.parse(fs.readFileSync(`${__dirname}/../../public/csv/source.xls`));
     var data = workSheetsFromBuffer[0].data;
 
     var res = [];
@@ -315,7 +315,7 @@ module.exports = function () {
 
     });
 
-    var chunkMount = 10000;
+    var chunkMount = 200;
     var chunks = _.chunk(res, chunkMount);
     _.each(chunks, function (v, k) {
         if (k != 0) {
@@ -324,6 +324,6 @@ module.exports = function () {
         csv.transform(chunks[k], function (data) {
             data.push(data);
             return data.join(',') + '\n';
-        }).pipe(fs.createWriteStream(__dirname + '/../../public/result' + k + '.csv'), {encoding: 'utf8'});
+        }).pipe(fs.createWriteStream(__dirname + '/../../public/csv/result' + k + '.csv'), {encoding: 'utf8'});
     });
 };
