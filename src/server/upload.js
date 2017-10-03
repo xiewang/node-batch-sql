@@ -3,6 +3,7 @@
 var fs = require("fs");
 var transform = require("./transformCSV.js");
 var add = require("./add.js");
+var autoadd = require("./autoadd.js");
 
 
 module.exports = function (req, res, next) {
@@ -14,15 +15,15 @@ module.exports = function (req, res, next) {
         fs.unlink(req.file.path, function () {
             if (err) throw err;
             //transform();
-            add()
-                .then(function () {
-                    response = {
-                        message: 'File uploaded successfully',
-                        filename: req.file.originalname
-                    };
-                    res.end(JSON.stringify(response));
-                });
-
+            //add()
+            //    .then(function () {
+            //        response = {
+            //            message: 'File uploaded successfully',
+            //            filename: req.file.originalname
+            //        };
+            //        res.end(JSON.stringify(response));
+            //    });
+            autoadd();
         });
     });
 };
