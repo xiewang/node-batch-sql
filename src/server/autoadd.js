@@ -116,22 +116,37 @@ function start() {
 
     var warpData = function () {
         fetchData().then(function (res) {
-            if(res){
-                _.each(function(v,k){
+            if (res) {
+                _.each(function (v, k) {
                     add(v);
                 })
 
             }
         });
-    }
-    var add = function (data) {
+    };
 
-        sqlKV.hao_leix = res.result.item.tmall == '1' ? '天猫' : '淘宝';
-        sqlKV.item_id = res.result.item.itemId;
-        sqlKV.hao_zhutu = 'http:' + res.result.item.picUrl;
-        sqlKV.hao_xiaol = res.result.item.biz30Day;
-        sqlKV.item_id = res.result.item.itemId;
+    var add = function (data) {
+        var coupon = 0;
+        if (/满(\d{1,})元减(\d{1,})元/.test(data.coupon_info)) {
+            coupon = data.coupon_info.split('元')[1].substr(1);
+        } else if (/(\d{1,})元无条件券/.test(data.coupon_info)) {
+            coupon = data.coupon_info.split('元')[0];
+        }
+
+        sqlKV.hao_leix = data.user_type == '1' ? '天猫' : '淘宝';
+        sqlKV.item_id = data.num_iid;
+        sqlKV.hao_zhutu = data.pict_url;
+        sqlKV.hao_xiaol = data.volume;
+        sqlKV.post_content = data.item_description;
+        sqlKV.post_title = data.title;
+        sqlKV.hao_yuanj = data.zk_final_price;
+        sqlKV.hao_xianj = Math.round((data.zk_final_price - coupon) * 100) / 100;
+        sqlKV.hao_youh = coupon;
+        sqlKV.hao_ljgm = data.coupon_click_url;
+        sqlKV.hao_zongl = data.coupon_total_count;
+        sqlKV.post_category = '';
         logger.info(sqlKV);
+        
         var add_post = 'INSERT INTO wp_posts SET `ID` = ' + sqlKV.id +
             ',`post_author` = ' + sqlKV.post_author +
             ',`post_content` = \"' + sqlKV.post_content +
