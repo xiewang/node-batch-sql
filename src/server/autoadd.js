@@ -34,7 +34,7 @@ function fetchData() {
             'platform': '1',
             'cat': '',
             'page_size': '100',
-            'q': '女装',
+            'q': '',
             'page_no': random(100)
         }, function (error, response) {
             if (!error) {
@@ -50,7 +50,7 @@ function fetchData() {
 };
 
 function start() {
-
+    var host = 'http://996shop.com';
     connection = mysql.createConnection({
         host: config.host,
         user: config.user,
@@ -76,7 +76,6 @@ function start() {
     var sqlKV = {};
     var sql = "select max(id) from wp_posts";
     var id = 0;
-    options.uri = promoteLink;
 
     connection.query(sql, function (error, results, fields) {
         if (error) {
@@ -146,7 +145,7 @@ function start() {
         sqlKV.hao_zongl = data.coupon_total_count;
         sqlKV.post_category = '';
         logger.info(sqlKV);
-        
+
         var add_post = 'INSERT INTO wp_posts SET `ID` = ' + sqlKV.id +
             ',`post_author` = ' + sqlKV.post_author +
             ',`post_content` = \"' + sqlKV.post_content +
