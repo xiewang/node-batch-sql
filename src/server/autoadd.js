@@ -83,7 +83,7 @@ function start() {
         if (error) {
             logger.error(error);
         }
-        id = results[0]['max(id)'] + 1;
+        id = results[0]['max(id)'];
         sqlKV = {
             post_author: 1,
             id: id,
@@ -135,27 +135,44 @@ function start() {
 
     var warpData = function () {
         var all = [];
-        fetchData().then(function (res) {
-            if (res) {
-                var count = 0;
-                _.each(res, function (v, k) {
-                    checkExist(v)
-                        .then(function (res) {
-                            if (!res && v.volume > 10) {
-                                all.push(v);
-                            }
-                            count ++ ;
-                            if (count == 100){
-                                _.each(all, function(v1,k1){
-                                    add(v1, k1);
-                                });
-                                connection.end();
-                            }
-                        });
-                    //add(v, k);
-                });
-            }
-        });
+        var countForAdd = 0;
+
+        var time = 0;
+        var interval = setInterval(function(){time++},1000);
+
+        var fetchAndAdd = function(){
+            fetchData().then(function (res) {
+                if (res) {
+                    var count = 0;
+                    _.each(res, function (v, k) {
+                        checkExist(v)
+                            .then(function (res) {
+                                if (!res && v.volume > 10) {
+                                    all.push(v);
+                                }
+                                count ++ ;
+                                if (count == 100){
+                                    _.each(all, function(v1,k1){
+                                        add(v1, k1+countForAdd+1);
+                                    });
+                                    countForAdd = countForAdd + all.length;
+                                    if(countForAdd<100&&time<600){
+                                        fetchAndAdd();
+                                    } else {
+                                        clearInterval(interval);
+                                        logger.info('countForAdd nums:'+countForAdd);
+                                        connection.end();
+                                    }
+                                }
+
+
+                            });
+                        //add(v, k);
+                    });
+                }
+            });
+        };
+        fetchAndAdd();
     };
 
     var add = function (data, key) {
