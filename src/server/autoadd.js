@@ -35,7 +35,7 @@ function fetchData() {
             'adzone_id': '119412095',
             'platform': '1',
             'cat': '',
-            'page_size': '10',
+            'page_size': '100',
             'q': '',
             'page_no': random(100)
         }, function (error, response) {
@@ -115,13 +115,45 @@ function start() {
         warpData();
     });
 
+    var checkExist = function (data) {
+        return new Promise(function (resolve, reject) {
+            var sql = "SELECT t1.id,t2.meta_value FROM wp_posts t1,wp_postmeta t2 " +
+                "WHERE t2.meta_key='item_id' and t1.id = t2.post_id and t2.meta_value=" + data.num_iid;
+            connection.query(sql, function (error, results, fields) {
+                if (error) {
+                    logger.error(error);
+                    resolve(false);
+                }
+                else if (results.length > 0) {
+                    resolve(true);
+                } else {
+                    resolve(false);
+                }
+            });
+        });
+    };
+
     var warpData = function () {
+        var all = [];
         fetchData().then(function (res) {
             if (res) {
+                var count = 0;
                 _.each(res, function (v, k) {
-                    add(v, k);
+                    checkExist(v)
+                        .then(function (res) {
+                            if (!res && v.volume > 10) {
+                                all.push(v);
+                            }
+                            count ++ ;
+                            if (count == 100){
+                                _.each(all, function(v1,k1){
+                                    add(v1, k1);
+                                });
+                                connection.end();
+                            }
+                        });
+                    //add(v, k);
                 });
-                connection.end();
             }
         });
     };
@@ -137,7 +169,7 @@ function start() {
         sqlKV.hao_leix = data.user_type == '1' ? '天猫' : '淘宝';
         sqlKV.item_id = data.num_iid;
         sqlKV.hao_zhutu = data.pict_url;
-        sqlKV.hao_xiaol = data.volume;
+        sqlKV.hao_xiaol = data.volume ? data.volume : data.coupon_info;
         sqlKV.post_content = data.item_description;
         sqlKV.post_title = data.title;
         sqlKV.hao_yuanj = data.zk_final_price;
