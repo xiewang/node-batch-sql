@@ -134,24 +134,25 @@ function start() {
     };
 
     var warpData = function () {
-        var all = [];
         var countForAdd = 0;
 
         var time = 0;
         var interval = setInterval(function(){time++},1000);
 
         var fetchAndAdd = function(){
-            fetchData().then(function (res) {
-                if (res) {
+            var all = [];
+            fetchData().then(function (result) {
+                if (result) {
                     var count = 0;
-                    _.each(res, function (v, k) {
+                    result = _.uniq(result, 'num_iid');
+                    _.each(result, function (v, k) {
                         checkExist(v)
                             .then(function (res) {
                                 if (!res && v.volume > 10) {
                                     all.push(v);
                                 }
                                 count ++ ;
-                                if (count == 100){
+                                if (count == result.length){
                                     _.each(all, function(v1,k1){
                                         add(v1, k1+countForAdd+1);
                                     });
@@ -160,7 +161,7 @@ function start() {
                                         fetchAndAdd();
                                     } else {
                                         clearInterval(interval);
-                                        logger.info('countForAdd nums:'+countForAdd);
+                                        logger.info('=========countForAdd nums============:'+countForAdd);
                                         connection.end();
                                     }
                                 }

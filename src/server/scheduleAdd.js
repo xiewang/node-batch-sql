@@ -13,3 +13,4 @@ rule.hour = hour;
 var j = schedule.scheduleJob(rule, function () {
     mission();
 });
+mission();
