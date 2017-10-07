@@ -186,8 +186,8 @@ function start() {
         sqlKV.hao_leix = data.user_type == '1' ? '天猫' : '淘宝';
         sqlKV.item_id = data.num_iid;
         sqlKV.hao_zhutu = data.pict_url;
-        sqlKV.hao_xiaol = data.volume ? data.volume : data.coupon_info;
-        sqlKV.post_content = data.item_description;
+        sqlKV.hao_xiaol = data.volume;
+        sqlKV.post_content = data.item_description && data.item_description !=''? data.item_description : data.coupon_info;
         sqlKV.post_title = data.title;
         sqlKV.hao_yuanj = data.zk_final_price;
         sqlKV.hao_xianj = Math.round((data.zk_final_price - coupon) * 100) / 100;
