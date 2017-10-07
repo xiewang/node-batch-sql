@@ -195,7 +195,7 @@ function start() {
         sqlKV.hao_ljgm = data.coupon_click_url;
         sqlKV.hao_zongl = data.coupon_total_count;
         sqlKV.post_category = cate(data.category);
-        logger.info(sqlKV);
+        //logger.info(sqlKV);
 
         var add_post = 'INSERT INTO wp_posts SET `ID` = ' + sqlKV.id +
             ',`post_author` = ' + sqlKV.post_author +
