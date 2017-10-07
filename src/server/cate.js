@@ -329,4 +329,4 @@ var cate = function (id) {
 };
 
 
-module.exports = start;
+module.exports = cate;

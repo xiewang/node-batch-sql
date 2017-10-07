@@ -8,6 +8,8 @@ var log4js = require('log4js');
 var config = require('../constants.js');
 var csv = require('csv');
 var fs = require('fs');
+var cate = require('./cate.js');
+
 log4js.configure({
     appenders: {
         out: {type: 'stdout'},
@@ -33,7 +35,7 @@ function fetchData() {
             'adzone_id': '119412095',
             'platform': '1',
             'cat': '',
-            'page_size': '100',
+            'page_size': '10',
             'q': '',
             'page_no': random(100)
         }, function (error, response) {
@@ -108,7 +110,7 @@ function start() {
             item_id: '',
             hao_zhutu: '',
             hao_xiaol: '',
-            post_category: 49
+            post_category: 6
         };
         warpData();
     });
@@ -116,22 +118,22 @@ function start() {
     var warpData = function () {
         fetchData().then(function (res) {
             if (res) {
-                _.each(function (v, k) {
-                    add(v);
-                })
-
+                _.each(res, function (v, k) {
+                    add(v, k);
+                });
+                connection.end();
             }
         });
     };
 
-    var add = function (data) {
+    var add = function (data, key) {
         var coupon = 0;
         if (/满(\d{1,})元减(\d{1,})元/.test(data.coupon_info)) {
             coupon = data.coupon_info.split('元')[1].substr(1);
         } else if (/(\d{1,})元无条件券/.test(data.coupon_info)) {
             coupon = data.coupon_info.split('元')[0];
         }
-
+        sqlKV.id = sqlKV.id + key;
         sqlKV.hao_leix = data.user_type == '1' ? '天猫' : '淘宝';
         sqlKV.item_id = data.num_iid;
         sqlKV.hao_zhutu = data.pict_url;
@@ -140,10 +142,10 @@ function start() {
         sqlKV.post_title = data.title;
         sqlKV.hao_yuanj = data.zk_final_price;
         sqlKV.hao_xianj = Math.round((data.zk_final_price - coupon) * 100) / 100;
-        sqlKV.hao_youh = coupon;
+        sqlKV.hao_youh = parseInt(coupon);
         sqlKV.hao_ljgm = data.coupon_click_url;
         sqlKV.hao_zongl = data.coupon_total_count;
-        sqlKV.post_category = '';
+        sqlKV.post_category = cate(data.category);
         logger.info(sqlKV);
 
         var add_post = 'INSERT INTO wp_posts SET `ID` = ' + sqlKV.id +
@@ -194,10 +196,7 @@ function start() {
                 logger.error(error);
             }
             logger.info('update_term_taxonomy ' + results.affectedRows + ' rows');
-            response.status(200).send({result: 'success', link: sqlKV.guid});
         });
-
-        connection.end();
     }
 }
 
