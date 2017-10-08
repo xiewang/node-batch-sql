@@ -137,9 +137,11 @@ function start() {
         var countForAdd = 0;
 
         var time = 0;
-        var interval = setInterval(function(){time++},1000);
+        var interval = setInterval(function () {
+            time++
+        }, 1000);
 
-        var fetchAndAdd = function(){
+        var fetchAndAdd = function () {
             var all = [];
             fetchData().then(function (result) {
                 if (result) {
@@ -148,20 +150,28 @@ function start() {
                     _.each(result, function (v, k) {
                         checkExist(v)
                             .then(function (res) {
-                                if (!res && v.volume > 10) {
+                                var coupon = 0;
+                                if (/满(\d{1,})元减(\d{1,})元/.test(v.coupon_info)) {
+                                    coupon = v.coupon_info.split('元')[1].substr(1);
+                                } else if (/(\d{1,})元无条件券/.test(v.coupon_info)) {
+                                    coupon = v.coupon_info.split('元')[0];
+                                }
+                                v.coupon_info = parseInt(coupon);
+                                if (!res && v.volume > 10 && v.coupon_info >= 3) {
                                     all.push(v);
                                 }
-                                count ++ ;
-                                if (count == result.length){
-                                    _.each(all, function(v1,k1){
-                                        add(v1, k1+countForAdd+1);
+                                count++;
+                                if (count == result.length) {
+                                    _.each(all, function (v1, k1) {
+                                        add(v1, k1 + countForAdd + 1);
                                     });
                                     countForAdd = countForAdd + all.length;
-                                    if(countForAdd<100&&time<600){
+                                    logger.info('=========each time countForAdd nums============:' + countForAdd);
+                                    if (countForAdd < 60 && time < 600) {
                                         fetchAndAdd();
                                     } else {
                                         clearInterval(interval);
-                                        logger.info('=========countForAdd nums============:'+countForAdd);
+                                        logger.info('=========countForAdd nums============:' + countForAdd);
                                         connection.end();
                                     }
                                 }
@@ -177,18 +187,18 @@ function start() {
     };
 
     var add = function (data, key) {
-        var coupon = 0;
-        if (/满(\d{1,})元减(\d{1,})元/.test(data.coupon_info)) {
-            coupon = data.coupon_info.split('元')[1].substr(1);
-        } else if (/(\d{1,})元无条件券/.test(data.coupon_info)) {
-            coupon = data.coupon_info.split('元')[0];
-        }
+        var coupon = data.coupon_info;
+        //if (/满(\d{1,})元减(\d{1,})元/.test(data.coupon_info)) {
+        //    coupon = data.coupon_info.split('元')[1].substr(1);
+        //} else if (/(\d{1,})元无条件券/.test(data.coupon_info)) {
+        //    coupon = data.coupon_info.split('元')[0];
+        //}
         sqlKV.id = sqlKV.id + key;
         sqlKV.hao_leix = data.user_type == '1' ? '天猫' : '淘宝';
         sqlKV.item_id = data.num_iid;
         sqlKV.hao_zhutu = data.pict_url;
         sqlKV.hao_xiaol = data.volume;
-        sqlKV.post_content = data.item_description && data.item_description !=''? data.item_description : data.coupon_info;
+        sqlKV.post_content = data.item_description && data.item_description != '' ? data.item_description : data.coupon_info;
         sqlKV.post_title = data.title;
         sqlKV.hao_yuanj = data.zk_final_price;
         sqlKV.hao_xianj = Math.round((data.zk_final_price - coupon) * 100) / 100;
