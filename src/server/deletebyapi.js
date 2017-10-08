@@ -57,7 +57,7 @@ function start() {
             connection.end();
         } else {
             //connection.end();
-            //deleteData(results);
+            deleteData(results);
         }
     });
 }
