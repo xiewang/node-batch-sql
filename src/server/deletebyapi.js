@@ -46,17 +46,7 @@ function start() {
     });
 
     //var sql = "SELECT wp.id,pm.meta_value FROM wp_postmeta pm LEFT JOIN wp_posts wp ON wp.ID = pm.post_id WHERE post_title = '夏季韩版长袖防晒衣女开衫中长款大码宽松沙滩雪纺披肩超薄款外套' and meta_key = 'hao_ljgm'";
-    var sql = "SELECT t1.id,t5.meta_value " +
-        "FROM wp_posts t1, wp_terms t2, wp_term_relationships t3,wp_term_taxonomy t4, wp_postmeta t5 " +
-        "WHERE t3.term_taxonomy_id = t4.term_taxonomy_id " +
-        "AND t1.id = t3.object_id " +
-        "AND t2.term_id = t4.term_id " +
-        "AND t1.id = t5.post_id " +
-        "AND t4.taxonomy = 'post_tag' " +
-        "AND t1.post_status = 'publish' " +
-        "AND t1.post_type = 'post' " +
-        "AND t2.name='auto' " +
-        "AND t5.meta_key='hao_ljgm' ";
+    var sql = "SELECT t1.id,t5.meta_value FROM wp_posts t1, wp_postmeta t5 WHERE t1.id = t5.post_id AND t1.post_status = 'publish' AND t1.post_type = 'post'  AND t5.meta_key='hao_ljgm' AND t1.id !=32322 ";
     //"AND t5.meta_key='hao_ljgm' limit 100 ";
     connection.query(sql, function (error, results, fields) {
         if (error) {
@@ -67,7 +57,7 @@ function start() {
             connection.end();
         } else {
             //connection.end();
-            deleteData(results);
+            //deleteData(results);
         }
     });
 }
