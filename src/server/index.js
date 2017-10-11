@@ -138,7 +138,7 @@ module.exports = function (req, response) {
 
                             //send weibo
                             var message = {
-                                text: '【'+sqlKV.hao_leix+'】'+sqlKV.post_title+'\n【在售价】'+sqlKV.hao_yuanj+'\n【券后价】'+sqlKV.hao_xianj+'\n【下单链接】'+sqlKV.guid,
+                                text: '【'+sqlKV.hao_leix+'】'+sqlKV.post_title+'\n【在售价】'+sqlKV.hao_yuanj+'元\n【券后价】'+sqlKV.hao_xianj+'元\n【下单链接】'+sqlKV.guid,
                                 imageUrl: sqlKV.hao_zhutu,
                                 uri: sqlKV.guid
                             };
