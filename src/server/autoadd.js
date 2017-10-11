@@ -26,6 +26,19 @@ logger.level = 'debug';
 var connection = '';
 
 function fetchData() {
+    var random1000 = [
+        random(10),
+        random(30),
+        random(50),
+        random(60),
+        random(70),
+        random(80),
+        random(90),
+        random(100),
+        random(1000),
+        random(100000)
+    ];
+
     return new Promise(function (resolve, reject) {
         var client = new ApiClient({
             'appkey': '24545248',
@@ -36,9 +49,9 @@ function fetchData() {
             'adzone_id': '119412095',
             'platform': '1',
             'cat': '',
-            'page_size': '100',
+            'page_size': 100,
             'q': '',
-            'page_no': random(100)
+            'page_no': random1000[random(10)-1]
         }, function (error, response) {
             if (!error) {
                 var data = response.results.tbk_coupon;
@@ -146,6 +159,11 @@ function start() {
         var fetchAndAdd = function () {
             var all = [];
             fetchData().then(function (result) {
+                if(result.length === 0){
+                    fetchAndAdd();
+                    return;
+                }
+
                 if (result) {
                     var count = 0;
                     result = _.uniq(result, 'num_iid');
@@ -159,7 +177,9 @@ function start() {
                                     coupon = v.coupon_info.split('元')[0];
                                 }
                                 v.coupon_info = parseInt(coupon);
-                                if (!res && v.volume > 10 && v.coupon_info >= 3) {
+                                if (!res
+                                    && ((v.volume > 10 && v.coupon_info >= 5)
+                                    || ((v.volume > 100 && v.coupon_info >= 3)))) {
                                     all.push(v);
                                 }
                                 count++;
@@ -286,7 +306,7 @@ function senWeiboL(items){
     });
     if(pickedOne.pict_url){
         var message = {
-            text: '【'+(pickedOne.user_type == "1" ? "天猫" : "淘宝")+'】'+pickedOne.title+'\n【在售价】'+pickedOne.zk_final_price+'元\n【券后价】'+(Math.round((pickedOne.zk_final_price - pickedOne.coupon_info) * 100) / 100)+'元\n【下单链接】http://www.996shop.com/bd/'+pickedOne.sqlId+'\n【领券直达】'+sqlKV.coupon_click_url,
+            text: '【'+(pickedOne.user_type == "1" ? "天猫" : "淘宝")+'】'+pickedOne.title+'\n【在售价】'+pickedOne.zk_final_price+'元\n【券后价】'+(Math.round((pickedOne.zk_final_price - pickedOne.coupon_info) * 100) / 100)+'元\n【下单链接】http://www.996shop.com/bd/'+pickedOne.sqlId+'\n【领券直达】'+pickedOne.coupon_click_url,
             imageUrl: pickedOne.pict_url,
             uri: 'http://www.996shop.com/bd/'+pickedOne.sqlId,
             type: 1
