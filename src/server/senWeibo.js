@@ -26,13 +26,14 @@ logger.level = 'debug';
  *
  */
 var send = function (message) {
+    message.type = message.type? message.type: 2;
     return new Promise(function(resolve,rject){
         fs.readFile(__dirname+'/../../token.text', 'utf-8', function (err, data) {
             if (err) {
                 return false
             } else {
                 var fileUrl  = message.imageUrl;
-                var filename = '2.png';
+                var filename = message.type+'.png';
                 downloadFile(fileUrl,filename,function(){
                     message.token = data;
                     logger.info('======下载成功=====')
@@ -55,9 +56,9 @@ var getToken = function (message) {
         },
         formData: {
             pic: {
-                value: fs.createReadStream(__dirname+'/2.png'),
+                value: fs.createReadStream(__dirname+'/'+message.type+'.png'),
                 options: {
-                    filename: '2.png',
+                    filename: message.type+'.png',
                     contentType: 'image/png'
                 }
             },

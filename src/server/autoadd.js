@@ -9,6 +9,7 @@ var config = require('../constants.js');
 var csv = require('csv');
 var fs = require('fs');
 var cate = require('./cate.js');
+var sendWeibo = require('./senWeibo.js');
 
 log4js.configure({
     appenders: {
@@ -141,6 +142,7 @@ function start() {
             time++
         }, 1000);
 
+        var allForWeibo = [];
         var fetchAndAdd = function () {
             var all = [];
             fetchData().then(function (result) {
@@ -163,8 +165,13 @@ function start() {
                                 count++;
                                 if (count == result.length) {
                                     _.each(all, function (v1, k1) {
-                                        add(v1, k1 + countForAdd + 1);
+                                        var sqlId = sqlKV.id + 1;
+                                        v1.sqlId = sqlId;
+                                        allForWeibo.push(v1);
+
+                                        add(v1);
                                     });
+
                                     countForAdd = countForAdd + all.length;
                                     logger.info('=========each time countForAdd nums============:' + countForAdd);
                                     if (countForAdd < 60 && time < 600) {
@@ -172,6 +179,9 @@ function start() {
                                     } else {
                                         clearInterval(interval);
                                         logger.info('=========countForAdd nums============:' + countForAdd);
+
+                                        //send weibo
+                                        senWeiboL(allForWeibo);
                                         connection.end();
                                     }
                                 }
@@ -186,14 +196,14 @@ function start() {
         fetchAndAdd();
     };
 
-    var add = function (data, key) {
+    var add = function (data) {
         var coupon = data.coupon_info;
         //if (/满(\d{1,})元减(\d{1,})元/.test(data.coupon_info)) {
         //    coupon = data.coupon_info.split('元')[1].substr(1);
         //} else if (/(\d{1,})元无条件券/.test(data.coupon_info)) {
         //    coupon = data.coupon_info.split('元')[0];
         //}
-        sqlKV.id = sqlKV.id + key;
+        sqlKV.id = sqlKV.id + 1;
         sqlKV.hao_leix = data.user_type == '1' ? '天猫' : '淘宝';
         sqlKV.item_id = data.num_iid;
         sqlKV.hao_zhutu = data.pict_url;
@@ -264,5 +274,26 @@ function random(count) {
     return Math.ceil(Math.random() * count);
 }
 
+function senWeiboL(items){
+    //send weibo
+    var pickedOne = {
+        volume: 0
+    };
+    _.each(items, function (v, k) {
+        if(v.volume>pickedOne.volume && v.item_description.length>=10){
+            pickedOne = v;
+        }
+    });
+    if(pickedOne.pict_url){
+        var message = {
+            text: '【'+(pickedOne.user_type == "1" ? "天猫" : "淘宝")+'】'+pickedOne.title+'\n【在售价】'+pickedOne.zk_final_price+'元\n【券后价】'+(Math.round((pickedOne.zk_final_price - pickedOne.coupon_info) * 100) / 100)+'元\n【下单链接】http://www.996shop.com/bd/'+pickedOne.sqlId,
+            imageUrl: pickedOne.pict_url,
+            uri: 'http://www.996shop.com/bd/'+pickedOne.sqlId,
+            type: 1
+        };
+        sendWeibo(message);
+    }
+
+}
 
 module.exports = start;
