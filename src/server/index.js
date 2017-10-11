@@ -5,6 +5,8 @@ var Promise = require('bluebird');
 var rp = require('request-promise');
 var log4js = require('log4js');
 var config = require('../constants.js');
+var sendWeibo = require('./senWeibo.js');
+
 log4js.configure({
     appenders: {
         out: {type: 'stdout'},
@@ -19,7 +21,7 @@ logger.level = 'debug';
 
 module.exports = function (req, response) {
 
-    var host = 'http://996shop.com';
+    var host = 'http://www.996shop.com';
     var connection = mysql.createConnection({
         host: config.host,
         user: config.user,
@@ -92,6 +94,7 @@ module.exports = function (req, response) {
             post_category: 49
         };
         add();
+
     });
 
     var add = function () {
@@ -132,6 +135,16 @@ module.exports = function (req, response) {
                             sqlKV.hao_xiaol = res.result.item.biz30Day;
                             sqlKV.item_id = res.result.item.itemId;
                             logger.info(sqlKV);
+
+                            //send weibo
+                            var message = {
+                                text: '【'+sqlKV.hao_leix+'】'+sqlKV.post_title+'\n【在售价】'+sqlKV.hao_yuanj+'\n【券后价】'+sqlKV.hao_xianj+'\n【下单链接】'+sqlKV.guid,
+                                imageUrl: sqlKV.hao_zhutu,
+                                uri: sqlKV.guid
+                            };
+                            sendWeibo(message);
+
+                            //send bandaowang
                             var add_post = 'INSERT INTO wp_posts SET `ID` = ' + sqlKV.id +
                                 ',`post_author` = ' + sqlKV.post_author +
                                 ',`post_content` = \"' + sqlKV.post_content +
