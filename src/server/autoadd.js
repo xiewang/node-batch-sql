@@ -51,7 +51,7 @@ function fetchData() {
             'cat': '',
             'page_size': 100,
             'q': '',
-            'page_no': random1000[random(10)-1]
+            'page_no': random1000[random(10) - 1]
         }, function (error, response) {
             if (!error) {
                 var data = response.results.tbk_coupon;
@@ -156,10 +156,11 @@ function start() {
         }, 1000);
 
         var allForWeibo = [];
+        var hasOne = {2: 0, 3: 0};//避免服装类过多
         var fetchAndAdd = function () {
             var all = [];
             fetchData().then(function (result) {
-                if(result.length === 0){
+                if (result.length === 0) {
                     fetchAndAdd();
                     return;
                 }
@@ -167,6 +168,7 @@ function start() {
                 if (result) {
                     var count = 0;
                     result = _.uniq(result, 'num_iid');
+
                     _.each(result, function (v, k) {
                         checkExist(v)
                             .then(function (res) {
@@ -179,7 +181,12 @@ function start() {
                                 v.coupon_info = parseInt(coupon);
                                 if (!res
                                     && ((v.volume > 10 && v.coupon_info >= 5)
-                                    || ((v.volume > 100 && v.coupon_info >= 3)))) {
+                                    || ((v.volume > 100 && v.coupon_info >= 3)))
+                                    && ((cate(v.category) === 2 && hasOne[2] < 4)
+                                    || (cate(v.category) === 3 && hasOne[3] < 4)
+                                    || (cate(v.category) !== 2 && cate(v.category) !== 3))) {
+
+                                    hasOne[cate(v.category)]++;
                                     all.push(v);
                                 }
                                 count++;
@@ -294,21 +301,21 @@ function random(count) {
     return Math.ceil(Math.random() * count);
 }
 
-function senWeiboL(items){
+function senWeiboL(items) {
     //send weibo
     var pickedOne = {
         volume: 0
     };
     _.each(items, function (v, k) {
-        if(v.volume>pickedOne.volume && v.item_description.length>=10){
+        if (v.volume > pickedOne.volume && v.item_description.length >= 10) {
             pickedOne = v;
         }
     });
-    if(pickedOne.pict_url){
+    if (pickedOne.pict_url) {
         var message = {
-            text: '【'+(pickedOne.user_type == "1" ? "天猫" : "淘宝")+'】'+pickedOne.title+'\n【在售价】'+pickedOne.zk_final_price+'元\n【券后价】'+comm.toDecimal2((Math.round((pickedOne.zk_final_price - pickedOne.coupon_info) * 100) / 100))+'元\n【下单链接】http://www.996shop.com/bd/'+pickedOne.sqlId+'\n【领券直达】'+pickedOne.coupon_click_url,
+            text: '【' + (pickedOne.user_type == "1" ? "天猫" : "淘宝") + '】' + pickedOne.title + '\n【在售价】' + pickedOne.zk_final_price + '元\n【券后价】' + comm.toDecimal2((Math.round((pickedOne.zk_final_price - pickedOne.coupon_info) * 100) / 100)) + '元\n【下单链接】http://www.996shop.com/bd/' + pickedOne.sqlId + '\n【领券直达】' + pickedOne.coupon_click_url,
             imageUrl: pickedOne.pict_url,
-            uri: 'http://www.996shop.com/bd/'+pickedOne.sqlId,
+            uri: 'http://www.996shop.com/bd/' + pickedOne.sqlId,
             type: 1
         };
         sendWeibo(message);
@@ -316,4 +323,5 @@ function senWeiboL(items){
 
 }
 
+//start();
 module.exports = start;
