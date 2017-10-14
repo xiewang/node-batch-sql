@@ -26,18 +26,18 @@ logger.level = 'debug';
  *
  */
 var send = function (message) {
-    message.type = message.type? message.type: 2;
-    return new Promise(function(resolve,rject){
-        fs.readFile(__dirname+'/../../token.text', 'utf-8', function (err, data) {
+    message.type = message.type ? message.type : 2;
+    return new Promise(function (resolve, rject) {
+        fs.readFile(__dirname + '/../../token.text', 'utf-8', function (err, data) {
             if (err) {
                 return false
             } else {
-                var fileUrl  = message.imageUrl;
-                var filename = message.type+'.png';
-                downloadFile(fileUrl,filename,function(){
+                var fileUrl = message.imageUrl;
+                var filename = message.type + '.png';
+                downloadFile(fileUrl, filename, function () {
                     message.token = data;
                     logger.info('======下载成功=====')
-                    getToken(message);
+                    weibo(message);
                     resolve(true)
                 });
             }
@@ -47,7 +47,7 @@ var send = function (message) {
 
 };
 
-var getToken = function (message) {
+var weibo = function (message) {
     var options = {
         method: 'post',
         uri: 'https://api.weibo.com/2/statuses/share.json',
@@ -56,9 +56,9 @@ var getToken = function (message) {
         },
         formData: {
             pic: {
-                value: fs.createReadStream(__dirname+'/'+message.type+'.png'),
+                value: fs.createReadStream(__dirname + '/' + message.type + '.png'),
                 options: {
-                    filename: message.type+'.png',
+                    filename: message.type + '.png',
                     contentType: 'image/png'
                 }
             },
@@ -71,16 +71,47 @@ var getToken = function (message) {
     logger.info(options);
     rp(options)
         .then(function (res) {
-            if (res)
-                logger.info('微博发送成功'+message)
+            if (res) {
+                if (message.reason)
+                    comment(message, res.id);
+                logger.info('微博发送成功' + message);
+            }
+
         })
         .catch(function (err) {
-            logger.error('微博发送失败'+err);
+            logger.error('微博发送失败' + err);
         })
 };
 
-var downloadFile = function(uri,filename,callback){
-    var stream = fs.createWriteStream(__dirname+'/'+filename);
+var comment = function (message, commentId) {
+    var options = {
+        method: 'post',
+        uri: 'https://api.weibo.com/2/comments/create.json',
+        headers: {
+            'content-type': 'application/x-www-form-urlencoded',
+            'User-Agent': 'Request-Promise'
+        },
+        qs: {
+            comment: message.reason,
+            id: commentId,
+            access_token: message.token
+        },
+        timeout: 15000,
+        json: true
+    };
+    logger.info(options);
+    rp(options)
+        .then(function (res) {
+            if (res)
+                logger.info('评论发送成功')
+        })
+        .catch(function (err) {
+            logger.error('评论发送失败' + err);
+        })
+};
+
+var downloadFile = function (uri, filename, callback) {
+    var stream = fs.createWriteStream(__dirname + '/' + filename);
     request(uri)
         .on('end', callback)
         .pipe(stream)
