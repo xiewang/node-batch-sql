@@ -304,6 +304,20 @@ function random(count) {
 function senWeiboL(items) {
     //send weibo
 
+    var combineAndSend = function(pickedOne){
+        if (pickedOne.pict_url) {
+            var message = {
+                text: '【' + (pickedOne.user_type == "1" ? "天猫" : "淘宝") + '】' + pickedOne.title +'\n>>'+comm.toDecimal2(pickedOne.coupon_info)+'元优惠券<<\n【在售价】' + pickedOne.zk_final_price + '元\n【券后价】' + comm.toDecimal2((Math.round((pickedOne.zk_final_price - pickedOne.coupon_info) * 100) / 100)) + '元\n【下单链接】http://www.996shop.com/bd/' + pickedOne.sqlId + '\n【领券直达】' + pickedOne.coupon_click_url,
+                imageUrl: pickedOne.pict_url,
+                uri: 'http://www.996shop.com/bd/' + pickedOne.sqlId,
+                type: 1,
+                reason: pickedOne.item_description
+            };
+            sendWeibo(message);
+        }
+        return true;
+    };
+
     items = _.sortBy(items, [function(o) { return o.coupon; }]);
     _.reverse(items);
     var count = 0;
@@ -314,20 +328,7 @@ function senWeiboL(items) {
         }
     });
 
-    var combineAndSend = function(pickedOne){
-        if (pickedOne.pict_url) {
-            var message = {
-                text: '【' + (pickedOne.user_type == "1" ? "天猫" : "淘宝") + '】' + pickedOne.title + '\n【在售价】' + pickedOne.zk_final_price + '元\n【券后价】' + comm.toDecimal2((Math.round((pickedOne.zk_final_price - pickedOne.coupon_info) * 100) / 100)) + '元\n【下单链接】http://www.996shop.com/bd/' + pickedOne.sqlId + '\n【领券直达】' + pickedOne.coupon_click_url,
-                imageUrl: pickedOne.pict_url,
-                uri: 'http://www.996shop.com/bd/' + pickedOne.sqlId,
-                type: 1,
-                reason: pickedOne.item_description
-            };
-            sendWeibo(message);
-        }
-    };
-
-
+    return true;
 }
 
 //start();
