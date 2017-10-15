@@ -318,15 +318,21 @@ function senWeiboL(items) {
         return true;
     };
 
-    items = _.sortBy(items, [function(o) { return o.coupon; }]);
+    items = _.sortBy(items, [function(o) { return o.coupon_info; }]);
     _.reverse(items);
     var count = 0;
     _.each(items, function (v, k) {
-        if (v.item_description.length >= 10 && count<2) {
-            combineAndSend(v);
+        if (v.item_description.length >= 10 && count<2 && (v.zk_final_price - v.coupon_info)<60) {
+            setTimeout(function(){
+                combineAndSend(v);
+            },k*60*2);
             count ++;
         }
+
     });
+    if(count === 0 ){
+        combineAndSend(items[0]);
+    }
 
     return true;
 }
