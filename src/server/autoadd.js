@@ -207,9 +207,9 @@ function start() {
                                         clearInterval(interval);
                                         logger.info('=========countForAdd nums============:' + countForAdd);
 
-                                        //send weibo
-                                        //senWeiboL(allForWeibo);
                                         allInserted = true;
+                                        //send weibo
+                                        senWeiboL(allForWeibo);
                                         connection.end();
                                     }
                                 }
@@ -297,10 +297,6 @@ function start() {
 
             allForWeibo.push(data);
 
-            if(allInserted){
-                //send weibo
-                senWeiboL(allForWeibo);
-            }
         });
 
     }
