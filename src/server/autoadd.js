@@ -160,7 +160,7 @@ function start() {
         var fetchAndAdd = function () {
             var all = [];
             fetchData().then(function (result) {
-                if (result && result.length === 0) {
+                if (!result || result.length === 0) {
                     fetchAndAdd();
                     return;
                 }
@@ -325,7 +325,7 @@ function senWeiboL(items) {
         if (v.item_description.length >= 10 && count<2 && (v.zk_final_price - v.coupon_info)<60) {
             setTimeout(function(){
                 combineAndSend(v);
-            },k*60*2);
+            },count*60*2*1000);
             count ++;
         }
 
