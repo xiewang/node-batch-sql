@@ -32,11 +32,12 @@ var send = function (message) {
             if (err) {
                 return false
             } else {
+                var json = JSON.parse(data);
                 var fileUrl = message.imageUrl;
                 var filename = message.type + '.png';
                 downloadFile(fileUrl, filename, function () {
-                    message.token = data;
-                    logger.info('======下载成功=====')
+                    message.token = json['1734550577'];
+                    logger.info('======下载成功=====');
                     weibo(message);
                     resolve(true)
                 });
@@ -80,6 +81,13 @@ var weibo = function (message) {
         })
         .catch(function (err) {
             logger.error('微博发送失败' + err);
+            fs.readFile(__dirname + '/../../token.text', 'utf-8', function (err, data) {
+                logger.info('换账号再发');
+                var json = JSON.parse(data);
+                message.token = json['2163403567'];
+                weibo(message);
+            })
+
         })
 };
 
