@@ -54,7 +54,7 @@ function fetchData() {
             'page_no': random1000[random(10) - 1]
         }, function (error, response) {
             if (!error) {
-                var data = response.results.tbk_coupon;
+                var data = response.results.tbk_coupon?response.results.tbk_coupon:null;
                 resolve(data);
             } else {
                 console.log(error);
@@ -160,7 +160,7 @@ function start() {
         var fetchAndAdd = function () {
             var all = [];
             fetchData().then(function (result) {
-                if (result.length === 0) {
+                if (result && result.length === 0) {
                     fetchAndAdd();
                     return;
                 }
