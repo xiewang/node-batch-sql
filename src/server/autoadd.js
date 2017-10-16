@@ -92,6 +92,8 @@ function start() {
     var sqlKV = {};
     var sql = "select max(id) from wp_posts";
     var id = 0;
+    var allForWeibo = [];
+    var allInserted = false;
 
     connection.query(sql, function (error, results, fields) {
         if (error) {
@@ -155,7 +157,7 @@ function start() {
             time++
         }, 1000);
 
-        var allForWeibo = [];
+        //var allForWeibo = [];
         var hasOne = {2: 0, 3: 0};//避免服装类过多
         var fetchAndAdd = function () {
             var all = [];
@@ -192,10 +194,8 @@ function start() {
                                 count++;
                                 if (count == result.length) {
                                     _.each(all, function (v1, k1) {
-                                        var sqlId = sqlKV.id + 1;
+                                        var sqlId = sqlKV.id +1;
                                         v1.sqlId = sqlId;
-                                        allForWeibo.push(v1);
-
                                         add(v1);
                                     });
 
@@ -208,7 +208,8 @@ function start() {
                                         logger.info('=========countForAdd nums============:' + countForAdd);
 
                                         //send weibo
-                                        senWeiboL(allForWeibo);
+                                        //senWeiboL(allForWeibo);
+                                        allInserted = true;
                                         connection.end();
                                     }
                                 }
@@ -225,12 +226,7 @@ function start() {
 
     var add = function (data) {
         var coupon = data.coupon_info;
-        //if (/满(\d{1,})元减(\d{1,})元/.test(data.coupon_info)) {
-        //    coupon = data.coupon_info.split('元')[1].substr(1);
-        //} else if (/(\d{1,})元无条件券/.test(data.coupon_info)) {
-        //    coupon = data.coupon_info.split('元')[0];
-        //}
-        sqlKV.id = sqlKV.id + 1;
+        sqlKV.id = data.sqlId;
         sqlKV.hao_leix = data.user_type == '1' ? '天猫' : '淘宝';
         sqlKV.item_id = data.num_iid;
         sqlKV.hao_zhutu = data.pict_url;
@@ -273,27 +269,40 @@ function start() {
         connection.query(add_post, function (error, results, fields) {
             if (error) {
                 logger.error(error);
+                var sqlId = sqlKV.id +1;
+                data.sqlId = sqlId;
+                add(data);
+                return;
             }
             logger.info('add_post ' + results.affectedRows + ' rows');
-        });
-        connection.query(add_meta, function (error, results, fields) {
-            if (error) {
-                logger.error(error);
+
+            connection.query(add_meta, function (error, results, fields) {
+                if (error) {
+                    logger.error(error);
+                }
+                logger.info('add_meta ' + results.affectedRows + ' rows');
+            });
+            connection.query(add_term_relationships, function (error, results, fields) {
+                if (error) {
+                    logger.error(error);
+                }
+                logger.info('add_term_relationships ' + results.affectedRows + ' rows');
+            });
+            connection.query(update_term_taxonomy, function (error, results, fields) {
+                if (error) {
+                    logger.error(error);
+                }
+                logger.info('update_term_taxonomy ' + results.affectedRows + ' rows');
+            });
+
+            allForWeibo.push(data);
+
+            if(allInserted){
+                //send weibo
+                senWeiboL(allForWeibo);
             }
-            logger.info('add_meta ' + results.affectedRows + ' rows');
         });
-        connection.query(add_term_relationships, function (error, results, fields) {
-            if (error) {
-                logger.error(error);
-            }
-            logger.info('add_term_relationships ' + results.affectedRows + ' rows');
-        });
-        connection.query(update_term_taxonomy, function (error, results, fields) {
-            if (error) {
-                logger.error(error);
-            }
-            logger.info('update_term_taxonomy ' + results.affectedRows + ' rows');
-        });
+
     }
 }
 
