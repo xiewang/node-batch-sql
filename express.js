@@ -3,6 +3,8 @@ var app = express()
 var add = require('./src/server')
 var upload = require('./src/server/upload.js')
 var storeCode = require('./src/server/storeCode.js')
+var test = require('./src/server/test.js')
+
 var bodyParser = require('body-parser')
 var multer = require('multer');
 var path = multer({dest: __dirname + '/public'});
@@ -17,7 +19,7 @@ app.use(express.static(__dirname + '/public'))
 app.post('/add', add);
 app.post('/upload', path.single('file'), upload);
 app.post('/storeCode', storeCode);
-
+app.get('/test', test);
 
 app.listen(3001, function () {
     console.log('Mock Data Server on port %d', 3001)
