@@ -329,7 +329,7 @@ function senWeiboL(items) {
     _.reverse(items);
     var count = 0;
     _.each(items, function (v, k) {
-        if (v.item_description.length >= 10 && count<2 && (v.zk_final_price - v.coupon_info)<60) {
+        if (v.item_description.length >= 10 && count<1 && (v.zk_final_price - v.coupon_info)<60) {
             setTimeout(function(){
                 combineAndSend(v);
             },count*60*2*1000);
