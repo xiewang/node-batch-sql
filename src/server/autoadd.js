@@ -208,6 +208,9 @@ function start() {
                                         logger.info('=========countForAdd nums============:' + countForAdd);
 
                                         allInserted = true;
+                                        setTimeout(function(){
+                                            connection.end();
+                                        },1000*10);
                                         //send weibo
                                         senWeiboL(allForWeibo);
                                     }
@@ -295,9 +298,6 @@ function start() {
             });
 
             allForWeibo.push(data);
-            if(allInserted){
-                connection.end();
-            }
 
         });
 

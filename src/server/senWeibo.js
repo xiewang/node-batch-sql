@@ -38,7 +38,7 @@ var send = function (message) {
                 downloadFile(fileUrl, filename, function () {
                     message.token = json['1734550577'];
                     logger.info('======下载成功=====');
-                    weibo(message);
+                    weibo(message, true);
                     resolve(true)
                 });
             }
@@ -48,7 +48,7 @@ var send = function (message) {
 
 };
 
-var weibo = function (message) {
+var weibo = function (message,haNext) {
     var options = {
         method: 'post',
         uri: 'https://api.weibo.com/2/statuses/share.json',
@@ -85,7 +85,8 @@ var weibo = function (message) {
                 logger.info('换账号再发');
                 var json = JSON.parse(data);
                 message.token = json['2163403567'];
-                weibo(message);
+                if(haNext)
+                    weibo(message,false);
             })
 
         })
