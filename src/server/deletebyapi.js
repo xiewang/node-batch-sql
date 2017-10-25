@@ -47,7 +47,7 @@ function start() {
 
     //var sql = "SELECT wp.id,pm.meta_value FROM wp_postmeta pm LEFT JOIN wp_posts wp ON wp.ID = pm.post_id WHERE post_title = '夏季韩版长袖防晒衣女开衫中长款大码宽松沙滩雪纺披肩超薄款外套' and meta_key = 'hao_ljgm'";
     //var sql = "SELECT t1.id,t5.meta_value FROM wp_posts t1, wp_postmeta t5 WHERE t1.id = t5.post_id AND t1.post_status = 'publish' AND t1.post_type = 'post'  AND t5.meta_key='hao_ljgm' AND t1.id !=32322 ";
-    var sql = "SELECT DISTINCT t1.id,t5.meta_value FROM wp_posts t1, wp_term_relationships t2, wp_postmeta t5 WHERE t1.id=t2.object_id AND t1.id = t5.post_id AND t1.post_status = 'publish' AND t1.post_type = 'post'  AND t5.meta_key='hao_ljgm' AND t1.id !=32322 AND t2.term_taxonomy_id!=49";
+    var sql = "SELECT DISTINCT t1.id,t5.meta_value FROM wp_posts t1, wp_term_relationships t2, wp_postmeta t5 WHERE t1.id=t2.object_id AND t1.id = t5.post_id AND t1.post_status = 'publish' AND t1.post_type = 'post'  AND t5.meta_key='hao_ljgm' AND t1.id !=32322 AND t2.term_taxonomy_id!=49 AND t2.term_taxonomy_id!=62 AND t2.term_taxonomy_id!=64";
     connection.query(sql, function (error, results, fields) {
         if (error) {
             logger.error(error);
