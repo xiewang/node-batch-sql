@@ -4,6 +4,7 @@ var fs = require("fs");
 var send = require('./senWeibo.js');
 var Promise = require('bluebird');
 var rp = require('request-promise');
+Promise.promisifyAll(fs);
 var log4js = require('log4js');
 log4js.configure({
     appenders: {
@@ -37,10 +38,24 @@ module.exports = function (req, response, next) {
     rp(options)
         .then(function (res) {
             if (res){
-                fs.writeFile('token.text', res.access_token, function(err){
-                    if(err) throw err;
-                    response.status(200).send({result:'success'});
+                fs.readFileAsync(__dirname + '/../../token.text', 'utf8').then(function(text){
+
+                    var json = {};
+                    if(text && text.length>0){
+                        try{
+                            json = JSON.parse(text);
+                        }catch(e){
+                        }
+                        json[res.uid] = res.access_token;
+                    }
+
+                    fs.writeFile('token.text', JSON.stringify(json), function(err){
+                        if(err) throw err;
+                        response.status(200).send({result:'success'});
+                    });
+
                 });
+
             }
         })
         .catch(function (err) {
