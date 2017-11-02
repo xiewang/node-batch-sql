@@ -314,12 +314,17 @@ function senWeiboL(items) {
     var combineAndSend = function(pickedOne){
         if (pickedOne.pict_url) {
             var message = {
-                text: '[礼物]领现金红包，请到置顶微博[礼物]\n【' + (pickedOne.user_type == "1" ? "天猫" : "淘宝") + '】(半刀网推荐)' + pickedOne.title +'\n>>'+comm.toDecimal2(pickedOne.coupon_info)+'元优惠券<<\n【在售价】' + pickedOne.zk_final_price + '元\n【券后价】' + comm.toDecimal2((Math.round((pickedOne.zk_final_price - pickedOne.coupon_info) * 100) / 100)) + '元\n【下单链接】http://www.996shop.com/bd/' + pickedOne.sqlId + '\n【领券直达】' + pickedOne.coupon_click_url,
+                //text: '[礼物]置顶微博有红包[礼物]\n(￥'+comm.toDecimal2((Math.round((pickedOne.zk_final_price - pickedOne.coupon_info) * 100) / 100))+')' + pickedOne.title +','+ pickedOne.item_description +'http://www.996shop.com/bd/' + pickedOne.sqlId,
+                text: '喜欢您来,详见评论'+'http://www.996shop.com/bd/' + pickedOne.sqlId,
+                forComment: '(￥'+comm.toDecimal2((Math.round((pickedOne.zk_final_price - pickedOne.coupon_info) * 100) / 100))+')' + pickedOne.title +','+ pickedOne.item_description +',领券&拍：'+'http://www.996shop.com/bd/' + pickedOne.sqlId,
                 imageUrl: pickedOne.pict_url,
                 uri: 'http://www.996shop.com/bd/' + pickedOne.sqlId,
                 type: 1,
                 reason: pickedOne.item_description
             };
+            if(message.forComment.length>140){
+                message.forComment ='(￥'+comm.toDecimal2((Math.round((pickedOne.zk_final_price - pickedOne.coupon_info) * 100) / 100))+')' +',领券&拍：'+'http://www.996shop.com/bd/' + pickedOne.sqlId;
+            }
             sendWeibo(message);
         }
         return true;

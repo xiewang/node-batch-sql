@@ -73,7 +73,7 @@ var weibo = function (message,haNext) {
     rp(options)
         .then(function (res) {
             if (res) {
-                if (message.reason)
+                if (message.uri)
                     comment(message, res.id);
                 logger.info('微博发送成功' + message);
             }
@@ -101,7 +101,7 @@ var comment = function (message, commentId) {
             'User-Agent': 'Request-Promise'
         },
         qs: {
-            comment: message.reason,
+            comment: message.forComment?message.forComment:'领券&拍：'+message.uri,
             id: commentId,
             access_token: message.token
         },

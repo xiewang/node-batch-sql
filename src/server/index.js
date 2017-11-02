@@ -138,7 +138,9 @@ module.exports = function (req, response) {
 
                             //send weibo
                             var message = {
-                                text: '[礼物]领现金红包，请到置顶微博[礼物]\n【'+sqlKV.hao_leix+'】(半刀网推荐)'+sqlKV.post_title+'\n>>'+comm.toDecimal2(sqlKV.hao_youh)+'元优惠券<<\n【在售价】'+sqlKV.hao_yuanj+'元\n【券后价】'+comm.toDecimal2(sqlKV.hao_xianj)+'元\n【下单链接】'+sqlKV.guid+'\n【领券直达】'+sqlKV.hao_ljgm,
+                                //text: '(￥'+comm.toDecimal2(sqlKV.hao_xianj)+')'+sqlKV.post_title+(sqlKV.post_content?','+sqlKV.post_content:'')+'[吃瓜]'+sqlKV.guid,
+                                text: '喜欢您来,详见评论'+sqlKV.guid,
+                                forComment: '(￥'+comm.toDecimal2(sqlKV.hao_xianj)+')'+sqlKV.post_title+(sqlKV.post_content?','+sqlKV.post_content:'')+'[吃瓜]'+',领券&拍：'+sqlKV.guid,
                                 imageUrl: sqlKV.hao_zhutu,
                                 uri: sqlKV.guid,
                                 reason: sqlKV.post_content
