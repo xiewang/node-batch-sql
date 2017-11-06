@@ -13,7 +13,7 @@ class App extends Component {
             adding: false
         };
         this.uploaderProps = {
-            action: '/upload',
+            action: '/mail',
             data: { },
             headers: {
                 Authorization: '',
@@ -27,13 +27,13 @@ class App extends Component {
                 // this.refs.inner.abort(file);
             },
             onSuccess(file) {
-                console.log('onSuccess', file);
+                alert('onSuccess', file);
             },
             onProgress(step, file) {
                 console.log('onProgress', Math.round(step.percent), file.name);
             },
             onError(err) {
-                console.log('onError', err);
+                alert('onError', err);
             },
         };
     }
