@@ -18,6 +18,7 @@ log4js.configure({
 });
 var logger = log4js.getLogger();
 logger.level = 'debug';
+var stringifier = csv.stringify();
 
 module.exports = function (req, res, next) {
     var des_file = __dirname + "/../../public/csv/mail.csv";
@@ -26,62 +27,68 @@ module.exports = function (req, res, next) {
     fs.rename(req.file.path, des_file, function (err) {
         if (err) throw err;
         fs.unlink(req.file.path, function () {
-            if (err){
+            if (err) {
                 throw err
             } else {
-                //var workSheetsFromBuffer = xlsx.parse(fs.readFileSync(`${__dirname}/../../public/csv/mail.csv`));
+                var mails = [];
                 var csvdata = fs.readFileSync(`${__dirname}/../../public/csv/mail.csv`);
 
-                csv.parse(csvdata, function(err, data){
-                    csv.transform(data, function(data){
-                        return data.map(function(value){
-                            var val = value.toUpperCase();
-                            if(/^(\w)+(\.\w+)*@(\w)+((\.\w+)+)$/.test(val)){
-                                
+                csv.parse(csvdata, function (err, data) {
+                    var dataL = data.length;
+                    var count = 0;
+                    csv.transform(data, function (data) {
+                        count++;
+                        data.map(function (value) {
+                            if (/^[a-z0-9]+([._\\-]*[a-z0-9])*@([a-z0-9]+[-a-z0-9]*[a-z0-9]+.){1,63}[a-z0-9]+$/.test(value)) {
+                                mails.push(value.toLowerCase());
                             }
                         });
-                    }, function(err, data){
-                        csv.stringify(data, function(err, data){
-                            process.stdout.write(data);
-                        });
+                        if (count === dataL)
+                            handleMails(mails);
+                    }, function (err, data) {
+                        logger.error('csv transform '+err);
                     });
+                    //handleMails(mails);
                 });
-                //var data = workSheetsFromBuffer[0].data;
-                //_.each(data, function (v, k) {
-                //    if (k != 0){
-                //        logger.info(v[2])
-                //        //setTimeout(function(){
-                //        //    var item = {
-                //        //        mail:  v[0],
-                //        //        sent: false
-                //        //    };
-                //        //    fs.readFile(__dirname + '/../../../mail-sender/mails.txt', 'utf-8', function (err, data) {
-                //        //        if (err) {
-                //        //            logger.error('read mails failure when add'+err);
-                //        //            return false
-                //        //        } else {
-                //        //            var json = [];
-                //        //            if(data)
-                //        //                json = JSON.parse(data);
-                //        //            if(!_.find(json, {mail:mail})){
-                //        //                json.push(item);
-                //        //                fs.writeFile(__dirname + '/../../../mail-sender/mails.txt', JSON.stringify(json), function (err) {
-                //        //                    if (err) {
-                //        //                        logger.error('add mails failure'+err);
-                //        //                    };
-                //        //                });
-                //        //            }
-                //        //        }
-                //        //    });
-                //        //},1000*k)
-                //    }
-                //
-                //})
+
             }
 
         });
     });
 
-    //res.status(200).send({result:'success'});
+    var handleMails = function (mails) {
+        var data = _.sortedUniq(mails);
+        if (data.length > 0)
+            _.each(data, function (v, k) {
+                logger.info(v);
+                setTimeout(function () {
+                    var item = {
+                        mail: v,
+                        sent: false
+                    };
+                    fs.readFile(__dirname + '/../../../mail-sender/mails.txt', 'utf-8', function (err, data) {
+                        if (err) {
+                            logger.error('read mails failure when add' + err);
+                            return false
+                        } else {
+                            var json = [];
+                            if (data)
+                                json = JSON.parse(data);
+                            if (!_.find(json, {mail: v})) {
+                                json.push(item);
+                                fs.writeFile(__dirname + '/../../../mail-sender/mails.txt', JSON.stringify(json), function (err) {
+                                    if (err) {
+                                        logger.error('add mails failure' + err);
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }, 1000 * k)
+
+            })
+    };
+
+    res.status(200).send({result: 'success'});
 
 };
